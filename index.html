@@ -264,9 +264,9 @@
   }
 
   #card {
-    width: min(88vw, 420px);
-    max-height: 82vh;
-    max-height: 82dvh;
+    width: min(92vw, 480px);
+    max-height: 85vh;
+    max-height: 85dvh;
     background: var(--card-bg);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
@@ -292,10 +292,12 @@
 
   #card .card-photo {
     width: 100%;
-    aspect-ratio: 16/10;
-    object-fit: cover;
+    max-height: 45vh;
+    max-height: 45dvh;
+    object-fit: contain;
     display: block;
     border-radius: 20px 20px 0 0;
+    background: rgba(0, 0, 0, 0.3);
   }
 
   #card .card-photo-placeholder {
@@ -473,15 +475,15 @@
 const wishes = [
   {
     text: "恭喜你在地球online这款游戏中，又成功续费一年VIP！",
-    photo: null
+    photo: "7.png"
   },
   {
     text: "愿你在新的一岁，匹配到的全是厉害的队友(特别是我这种),打出的全是叮叮叮的爆头！，遇到的全是人体描边大师！",
-    photo: null
+    photo: "8.png"
   },
   {
-    text: "在盛夏在八月在成年的18岁",
-    photo: null
+    text: "你刘姐打台球！",
+    photo: "6.png"
   },
   {
     text: "跟你玩了这么久，发现你变外向活泼了很多，替你感到高兴！",
@@ -493,7 +495,7 @@ const wishes = [
   },
   {
     text: "奶茶卡一张！持有词卡可以无条件赠送奶茶一杯，品牌任选！",
-    photo: null
+    photo: "5.png"
   },
   {
     text: "一起看海",
@@ -516,7 +518,7 @@ const wishes = [
     photo: null
   },
   {
-    text: "祝贺你长大成人，可以去网吧了！",
+    text: "祝贺你长大成人，可以去网吧了！你刘姐必须订个电竞酒店狠狠玩！",
     photo: null
   },
   {
@@ -528,7 +530,7 @@ const wishes = [
     photo: null
   },
   {
-    text: "你玩游戏很厉害，学东西很快，并没有别人说的那么菜，希望你越来越强，越来越厉害",
+    text: "你玩游戏很厉害，学东西很快，并没有别人说的那么菜，希望你越来越强，越来越厉害！",
     photo: null
   }
 ];
