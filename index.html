@@ -768,7 +768,7 @@ function openCard(index, starEl) {
   if (wish.photo) {
     cardPhoto.style.display = 'block';
     cardPhotoPlaceholder.style.display = 'none';
-    cardPhoto.src = wish.photo;
+    cardPhoto.src = wish.photo + '?v=' + Date.now();
     cardPhoto.onerror = function() {
       cardPhoto.style.display = 'none';
       cardPhotoPlaceholder.style.display = 'block';
