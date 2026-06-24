@@ -760,15 +760,19 @@ function openCard(index, starEl) {
   currentStarIndex = index;
   const wish = wishes[index];
 
-  // 照片
+  // 照片 — 先重置状态，避免异步竞态 bug
+  cardPhoto.onerror = null;
+  cardPhoto.onload = null;
+  cardPhoto.src = '';
+
   if (wish.photo) {
-    cardPhoto.src = wish.photo;
     cardPhoto.style.display = 'block';
     cardPhotoPlaceholder.style.display = 'none';
-    // 容错：照片加载失败时自动隐藏
+    cardPhoto.src = wish.photo;
     cardPhoto.onerror = function() {
       cardPhoto.style.display = 'none';
       cardPhotoPlaceholder.style.display = 'block';
+      cardPhoto.onerror = null;
     };
   } else {
     cardPhoto.style.display = 'none';
