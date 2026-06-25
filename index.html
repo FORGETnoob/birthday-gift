@@ -125,12 +125,12 @@
   }
 
   .wish-star:hover {
-    transform: translate(-50%, -50%) scale(1.3);
+    transform: translate(-50%, -50%) scale(1.6);
     z-index: 2;
   }
 
   .wish-star:active {
-    transform: translate(-50%, -50%) scale(0.95);
+    transform: translate(-50%, -50%) scale(1.1);
   }
 
   /* 星星核心 */
@@ -144,43 +144,64 @@
   }
 
   .wish-star .star-shape {
-    width: 18px;
-    height: 18px;
-    background: radial-gradient(circle, #ffffff 0%, #ffe8b0 30%, #f4d58d 60%, transparent 100%);
+    width: 6px;
+    height: 6px;
+    background: #ffffff;
     border-radius: 50%;
-    box-shadow: 0 0 12px 3px rgba(244, 213, 141, 0.5), 0 0 30px 6px rgba(244, 213, 141, 0.2);
+    box-shadow:
+      0 0 6px 2px rgba(180, 200, 255, 0.9),
+      0 0 14px 4px rgba(140, 160, 255, 0.5),
+      0 0 30px 8px rgba(100, 140, 255, 0.2);
     transition: all 0.5s ease;
-    animation: starPulse 2.5s ease-in-out infinite;
+    animation: starPulse 3s ease-in-out infinite;
   }
 
-  /* 不同的闪烁节奏 */
+  /* 不同闪烁节奏 */
   .wish-star:nth-child(odd) .star-shape  { animation-delay: 0s; }
-  .wish-star:nth-child(even) .star-shape { animation-delay: 0.8s; }
-  .wish-star:nth-child(3n) .star-shape   { animation-delay: 1.6s; }
-  .wish-star:nth-child(5n) .star-shape   { animation-delay: 0.4s; }
+  .wish-star:nth-child(even) .star-shape { animation-delay: 1s; }
+  .wish-star:nth-child(3n) .star-shape   { animation-delay: 2s; }
+  .wish-star:nth-child(5n) .star-shape   { animation-delay: 0.5s; }
 
   @keyframes starPulse {
-    0%, 100% { box-shadow: 0 0 12px 3px rgba(244, 213, 141, 0.5), 0 0 30px 6px rgba(244, 213, 141, 0.2); transform: scale(1); }
-    50%      { box-shadow: 0 0 18px 4px rgba(244, 213, 141, 0.7), 0 0 45px 9px rgba(244, 213, 141, 0.3); transform: scale(1.15); }
+    0%, 100% {
+      box-shadow: 0 0 6px 2px rgba(180, 200, 255, 0.8), 0 0 14px 4px rgba(140, 160, 255, 0.4), 0 0 30px 8px rgba(100, 140, 255, 0.15);
+      transform: scale(1);
+    }
+    50% {
+      box-shadow: 0 0 10px 3px rgba(200, 220, 255, 1), 0 0 22px 6px rgba(160, 180, 255, 0.6), 0 0 45px 12px rgba(120, 160, 255, 0.3);
+      transform: scale(1.25);
+    }
   }
 
   /* 已发现的星星 */
   .wish-star.discovered .star-shape {
-    background: radial-gradient(circle, #ffffff 0%, #ffdd80 25%, #f0c040 55%, transparent 100%);
-    box-shadow: 0 0 20px 5px rgba(240, 192, 64, 0.7), 0 0 45px 10px rgba(240, 192, 64, 0.3);
-    animation: starPulseDiscovered 2s ease-in-out infinite;
+    width: 5px;
+    height: 5px;
+    background: #ffe8d0;
+    box-shadow:
+      0 0 8px 3px rgba(255, 210, 160, 0.9),
+      0 0 18px 5px rgba(255, 180, 120, 0.5),
+      0 0 36px 10px rgba(255, 160, 100, 0.25);
+    animation: starPulseDiscovered 2.5s ease-in-out infinite;
   }
 
   @keyframes starPulseDiscovered {
-    0%, 100% { box-shadow: 0 0 20px 5px rgba(240, 192, 64, 0.7), 0 0 45px 10px rgba(240, 192, 64, 0.3); transform: scale(1); }
-    50%      { box-shadow: 0 0 28px 7px rgba(240, 192, 64, 0.9), 0 0 60px 14px rgba(240, 192, 64, 0.45); transform: scale(1.2); }
+    0%, 100% {
+      box-shadow: 0 0 8px 3px rgba(255, 210, 160, 0.8), 0 0 18px 5px rgba(255, 180, 120, 0.4), 0 0 36px 10px rgba(255, 160, 100, 0.2);
+      transform: scale(1);
+    }
+    50% {
+      box-shadow: 0 0 14px 5px rgba(255, 230, 180, 1), 0 0 28px 8px rgba(255, 200, 140, 0.6), 0 0 50px 15px rgba(255, 170, 110, 0.35);
+      transform: scale(1.3);
+    }
   }
 
-  /* 星星的十字光芒 (四角星) */
+  /* 十字光芒 */
   .wish-star .star-rays {
     position: absolute;
     inset: 0;
     pointer-events: none;
+    opacity: 0.5;
   }
 
   .wish-star .star-rays::before,
@@ -189,38 +210,39 @@
     position: absolute;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    background: rgba(255, 232, 176, 0.5);
-    border-radius: 2px;
+    background: rgba(180, 200, 255, 0.4);
+    border-radius: 1px;
     transition: all 0.5s ease;
   }
 
   .wish-star .star-rays::before {
-    width: 2px;
-    height: 28px;
+    width: 1px;
+    height: 18px;
   }
 
   .wish-star .star-rays::after {
-    width: 28px;
-    height: 2px;
+    width: 18px;
+    height: 1px;
   }
 
+  .wish-star.discovered .star-rays { opacity: 0.7; }
   .wish-star.discovered .star-rays::before,
   .wish-star.discovered .star-rays::after {
-    background: rgba(240, 192, 64, 0.7);
+    background: rgba(255, 200, 150, 0.5);
   }
 
   /* 星芒旋转 */
   .wish-star .star-sparkle {
     position: absolute;
-    inset: -6px;
+    inset: -4px;
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.4s ease;
   }
 
   .wish-star.discovered .star-sparkle {
-    opacity: 1;
-    animation: sparkleSpin 8s linear infinite;
+    opacity: 0.6;
+    animation: sparkleSpin 12s linear infinite;
   }
 
   @keyframes sparkleSpin {
@@ -234,18 +256,18 @@
     position: absolute;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    background: rgba(255, 220, 150, 0.35);
+    background: rgba(200, 210, 255, 0.3);
     border-radius: 1px;
   }
 
   .wish-star .star-sparkle::before {
-    width: 1.5px;
-    height: 40px;
+    width: 1px;
+    height: 28px;
   }
 
   .wish-star .star-sparkle::after {
-    width: 40px;
-    height: 1.5px;
+    width: 28px;
+    height: 1px;
   }
 
   /* ===== 卡片弹窗 ===== */
