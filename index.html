@@ -309,7 +309,10 @@ for(let i=0; i<total; i++) {
   el.dataset.index = i;
 
   const frontContent = wish.photo
-    ? `<img class="polaroid-photo" src="${wish.photo}?v=${Date.now()}" alt="" onerror="this.parentElement.parentElement.parentElement.querySelector('.polaroid-back').style.display='none'; this.style.display='none';" />`
+    ? `<div style="position:relative;width:100%;aspect-ratio:1/1;background:#e8e0d8;">
+         <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.8rem;">📷</div>
+         <img class="polaroid-photo" src="${wish.photo}" style="position:relative;z-index:1;" onerror="this.style.opacity='0'" alt="">
+       </div>`
     : `<div class="polaroid-placeholder">💝</div>`;
 
   el.innerHTML = `
