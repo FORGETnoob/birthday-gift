@@ -8,511 +8,196 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>✨ 刘语晴，生日快乐!</title>
 <style>
-  :root {
-    --card-bg: rgba(20, 20, 50, 0.92);
-    --gold: #f4d58d;
-    --gold-bright: #ffe8b0;
-    --star-glow: #ffeaa7;
-  }
+* { margin:0; padding:0; box-sizing:border-box; }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  width:100vw; height:100vh; height:100dvh;
+  overflow:hidden;
+  background: linear-gradient(170deg, #3d2b1f 0%, #5c3d2e 30%, #4a3020 60%, #2a1a10 100%);
+  font-family: "PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",sans-serif;
+  -webkit-tap-highlight-color:transparent;
+  user-select:none; -webkit-user-select:none;
+}
 
-  body {
-    width: 100vw;
-    height: 100vh;
-    height: 100dvh;
-    overflow: hidden;
-    background: #0a0a1a;
-    font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
-    cursor: default;
-    -webkit-tap-highlight-color: transparent;
-    user-select: none;
-    -webkit-user-select: none;
-  }
+/* 桌面纹理 */
+#desk {
+  position:fixed; inset:0;
+  background:
+    repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255,255,255,.008) 2px, rgba(255,255,255,.008) 4px),
+    repeating-linear-gradient(0deg, transparent, transparent 80px, rgba(0,0,0,.03) 80px, rgba(0,0,0,.03) 81px);
+}
 
-  /* ===== Canvas 背景 ===== */
-  #bg-canvas {
-    position: fixed;
-    inset: 0;
-    z-index: 1;
-  }
+/* 串灯线 */
+#fairy-lights {
+  position:fixed; top:0; left:0; right:0; height:80px; z-index:2;
+  pointer-events:none;
+}
+.light-bulb {
+  position:absolute; width:8px; height:8px; border-radius:50%;
+  background:#ffe8c0; box-shadow:0 0 12px 3px rgba(255,220,150,.7);
+  animation:bulbGlow 2s ease-in-out infinite;
+}
+.light-bulb:nth-child(odd) { animation-delay:0s; }
+.light-bulb:nth-child(even){ animation-delay:1s; }
+@keyframes bulbGlow {
+  0%,100% { opacity:.5; box-shadow:0 0 10px 2px rgba(255,220,150,.5); }
+  50% { opacity:1; box-shadow:0 0 18px 5px rgba(255,230,170,.9); }
+}
 
-  /* ===== 主界面 ===== */
-  #ui-layer {
-    position: fixed;
-    inset: 0;
-    z-index: 10;
-    pointer-events: none;
-  }
+/* 标题 */
+#header {
+  position:fixed; top:10px; left:50%; transform:translateX(-50%); z-index:10;
+  text-align:center; pointer-events:none;
+}
+#header .title {
+  font-size:clamp(1.2rem,3vw,1.8rem); font-weight:700;
+  color:rgba(255,240,220,.9);
+  text-shadow:0 0 20px rgba(255,200,150,.4);
+  letter-spacing:.05em;
+}
+#header .subtitle {
+  font-size:clamp(.7rem,1.8vw,.85rem);
+  color:rgba(255,220,200,.55); margin-top:2px;
+}
 
-  /* ===== 标题 ===== */
-  #header {
-    position: absolute;
-    top: clamp(20px, 5vh, 50px);
-    left: 50%;
-    transform: translateX(-50%);
-    text-align: center;
-    pointer-events: none;
-  }
+/* 计数器 */
+#counter {
+  position:fixed; bottom:20px; left:50%; transform:translateX(-50%); z-index:10;
+  font-size:clamp(.75rem,1.8vw,.9rem); color:rgba(255,220,200,.6);
+  letter-spacing:.04em; pointer-events:none;
+}
+#counter .count { color:#ffe0c0; font-weight:700; }
+#counter.complete { color:#ffe0c0; text-shadow:0 0 15px rgba(255,200,150,.5); }
 
-  #header .title {
-    font-size: clamp(1.6rem, 4vw, 2.6rem);
-    font-weight: 700;
-    color: #ffe8b0;
-    letter-spacing: 0.08em;
-    text-shadow: 0 0 30px rgba(244, 213, 141, 0.5), 0 0 80px rgba(244, 213, 141, 0.25);
-    animation: titleGlow 3s ease-in-out infinite;
-  }
+/* === 拍立得容器 === */
+#polaroids {
+  position:fixed; inset:60px 10px 60px 10px; z-index:5;
+}
 
-  @keyframes titleGlow {
-    0%, 100% { text-shadow: 0 0 30px rgba(244, 213, 141, 0.5), 0 0 80px rgba(244, 213, 141, 0.25); }
-    50%      { text-shadow: 0 0 40px rgba(244, 213, 141, 0.7), 0 0 100px rgba(244, 213, 141, 0.4); }
-  }
+/* === 单张拍立得 === */
+.polaroid {
+  position:absolute;
+  width:120px; perspective:600px;
+  cursor:pointer;
+  transition:transform .3s ease, z-index .3s ease;
+  z-index:1;
+}
+.polaroid:hover { z-index:20; transform:scale(1.08); }
+.polaroid.flipped { z-index:15; }
 
-  #header .subtitle {
-    font-size: clamp(0.85rem, 2vw, 1.1rem);
-    color: rgba(200, 200, 230, 0.75);
-    margin-top: 6px;
-    letter-spacing: 0.05em;
-  }
+/* 3D 翻转 */
+.polaroid-inner {
+  position:relative; width:100%;
+  transition:transform .6s cubic-bezier(.4,0,.2,1);
+  transform-style:preserve-3d;
+}
+.polaroid.flipped .polaroid-inner { transform:rotateY(180deg); }
 
-  /* ===== 计数器 ===== */
-  #counter {
-    position: absolute;
-    bottom: clamp(20px, 5vh, 40px);
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: clamp(0.85rem, 2vw, 1rem);
-    color: rgba(200, 200, 230, 0.7);
-    letter-spacing: 0.04em;
-    transition: all 0.5s ease;
-  }
+/* 正面 & 背面 */
+.polaroid-front, .polaroid-back {
+  width:100%; backface-visibility:hidden;
+  background:#f8f4ee;
+  border-radius:2px;
+  box-shadow:2px 3px 12px rgba(0,0,0,.35), 0 1px 3px rgba(0,0,0,.2);
+  overflow:hidden;
+}
+.polaroid-front { padding:7px 7px 28px 7px; }
+.polaroid-back {
+  position:absolute; inset:0;
+  padding:12px 10px;
+  transform:rotateY(180deg);
+  display:flex; align-items:center; justify-content:center;
+  text-align:center;
+}
 
-  #counter .count {
-    color: #f4d58d;
-    font-weight: 700;
-    font-size: 1.2em;
-  }
+/* 正面照片 */
+.polaroid-photo {
+  width:100%; aspect-ratio:1/1; object-fit:cover;
+  display:block; background:#e8e0d8;
+}
+.polaroid-placeholder {
+  width:100%; aspect-ratio:1/1;
+  display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(135deg, #f5ede0, #ede0d0);
+  color:#c8b8a0; font-size:2rem;
+}
 
-  #counter.complete {
-    color: #f4d58d;
-    animation: counterGlow 1.5s ease-in-out infinite;
-  }
+/* 背面文字 */
+.polaroid-back .back-text {
+  font-size:.78rem; line-height:1.65;
+  color:#5c4030; letter-spacing:.02em;
+}
+.polaroid-back .back-index {
+  position:absolute; bottom:8px; font-size:.65rem;
+  color:rgba(120,90,60,.5); letter-spacing:.05em;
+}
 
-  @keyframes counterGlow {
-    0%, 100% { text-shadow: 0 0 10px rgba(244, 213, 141, 0.4); }
-    50%      { text-shadow: 0 0 25px rgba(244, 213, 141, 0.9); }
-  }
+/* 手写体标签 */
+.polaroid-front::after {
+  content:''; position:absolute; bottom:8px; left:50%;
+  transform:translateX(-50%);
+  width:30px; height:2px; background:rgba(180,150,120,.3);
+  border-radius:1px;
+}
 
-  /* ===== 互动星星容器 ===== */
-  #stars-layer {
-    position: fixed;
-    inset: 80px 20px 80px 20px;
-    z-index: 5;
-    pointer-events: none;
-  }
+/* 移动端适配 */
+@media(max-width:768px) {
+  .polaroid { width:100px; }
+  .polaroid-back .back-text { font-size:.7rem; }
+  .polaroid-front { padding:5px 5px 22px 5px; }
+}
 
-  /* ===== 单颗许愿星 ===== */
-  .wish-star {
-    position: absolute;
-    width: 36px;
-    height: 36px;
-    pointer-events: auto;
-    cursor: pointer;
-    transform: translate(-50%, -50%);
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    z-index: 1;
-  }
+/* === 翻转提示 === */
+#hint {
+  position:fixed; bottom:55px; left:50%; transform:translateX(-50%); z-index:10;
+  font-size:.75rem; color:rgba(255,220,200,.4); pointer-events:none;
+  animation:hintFade 3s ease-in-out infinite;
+}
+@keyframes hintFade {
+  0%,100% { opacity:.3; }
+  50% { opacity:.8; }
+}
 
-  .wish-star:hover {
-    transform: translate(-50%, -50%) scale(1.6);
-    z-index: 2;
-  }
+/* === 完成弹窗 === */
+#complete-toast {
+  position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) scale(.8); z-index:200;
+  pointer-events:none; text-align:center; opacity:0;
+  transition:all .8s cubic-bezier(.34,1.56,.64,1);
+}
+#complete-toast.show { opacity:1; transform:translate(-50%,-50%) scale(1); }
+#complete-toast .icon { font-size:3rem; display:block; }
+#complete-toast .msg {
+  font-size:1.2rem; color:#ffe0c0; margin-top:6px;
+  text-shadow:0 0 20px rgba(255,200,150,.5);
+}
 
-  .wish-star:active {
-    transform: translate(-50%, -50%) scale(1.1);
-  }
-
-  /* 星星核心 */
-  .wish-star .star-core {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .wish-star .star-shape {
-    width: 6px;
-    height: 6px;
-    background: #ffffff;
-    border-radius: 50%;
-    box-shadow:
-      0 0 6px 2px rgba(180, 200, 255, 0.9),
-      0 0 14px 4px rgba(140, 160, 255, 0.5),
-      0 0 30px 8px rgba(100, 140, 255, 0.2);
-    transition: all 0.5s ease;
-    animation: starPulse 3s ease-in-out infinite;
-  }
-
-  /* 不同闪烁节奏 */
-  .wish-star:nth-child(odd) .star-shape  { animation-delay: 0s; }
-  .wish-star:nth-child(even) .star-shape { animation-delay: 1s; }
-  .wish-star:nth-child(3n) .star-shape   { animation-delay: 2s; }
-  .wish-star:nth-child(5n) .star-shape   { animation-delay: 0.5s; }
-
-  @keyframes starPulse {
-    0%, 100% {
-      box-shadow: 0 0 6px 2px rgba(180, 200, 255, 0.8), 0 0 14px 4px rgba(140, 160, 255, 0.4), 0 0 30px 8px rgba(100, 140, 255, 0.15);
-      transform: scale(1);
-    }
-    50% {
-      box-shadow: 0 0 10px 3px rgba(200, 220, 255, 1), 0 0 22px 6px rgba(160, 180, 255, 0.6), 0 0 45px 12px rgba(120, 160, 255, 0.3);
-      transform: scale(1.25);
-    }
-  }
-
-  /* 已发现的星星 */
-  .wish-star.discovered .star-shape {
-    width: 5px;
-    height: 5px;
-    background: #ffe8d0;
-    box-shadow:
-      0 0 8px 3px rgba(255, 210, 160, 0.9),
-      0 0 18px 5px rgba(255, 180, 120, 0.5),
-      0 0 36px 10px rgba(255, 160, 100, 0.25);
-    animation: starPulseDiscovered 2.5s ease-in-out infinite;
-  }
-
-  @keyframes starPulseDiscovered {
-    0%, 100% {
-      box-shadow: 0 0 8px 3px rgba(255, 210, 160, 0.8), 0 0 18px 5px rgba(255, 180, 120, 0.4), 0 0 36px 10px rgba(255, 160, 100, 0.2);
-      transform: scale(1);
-    }
-    50% {
-      box-shadow: 0 0 14px 5px rgba(255, 230, 180, 1), 0 0 28px 8px rgba(255, 200, 140, 0.6), 0 0 50px 15px rgba(255, 170, 110, 0.35);
-      transform: scale(1.3);
-    }
-  }
-
-  /* 十字光芒 */
-  .wish-star .star-rays {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    opacity: 0.5;
-  }
-
-  .wish-star .star-rays::before,
-  .wish-star .star-rays::after {
-    content: '';
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(180, 200, 255, 0.4);
-    border-radius: 1px;
-    transition: all 0.5s ease;
-  }
-
-  .wish-star .star-rays::before {
-    width: 1px;
-    height: 18px;
-  }
-
-  .wish-star .star-rays::after {
-    width: 18px;
-    height: 1px;
-  }
-
-  .wish-star.discovered .star-rays { opacity: 0.7; }
-  .wish-star.discovered .star-rays::before,
-  .wish-star.discovered .star-rays::after {
-    background: rgba(255, 200, 150, 0.5);
-  }
-
-  /* 星芒旋转 */
-  .wish-star .star-sparkle {
-    position: absolute;
-    inset: -4px;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.4s ease;
-  }
-
-  .wish-star.discovered .star-sparkle {
-    opacity: 0.6;
-    animation: sparkleSpin 12s linear infinite;
-  }
-
-  @keyframes sparkleSpin {
-    from { transform: rotate(0deg); }
-    to   { transform: rotate(360deg); }
-  }
-
-  .wish-star .star-sparkle::before,
-  .wish-star .star-sparkle::after {
-    content: '';
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(200, 210, 255, 0.3);
-    border-radius: 1px;
-  }
-
-  .wish-star .star-sparkle::before {
-    width: 1px;
-    height: 28px;
-  }
-
-  .wish-star .star-sparkle::after {
-    width: 28px;
-    height: 1px;
-  }
-
-  /* ===== 卡片弹窗 ===== */
-  #card-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(5, 5, 20, 0);
-    pointer-events: none;
-    transition: background 0.4s ease;
-  }
-
-  #card-overlay.active {
-    background: rgba(5, 5, 20, 0.7);
-    pointer-events: auto;
-  }
-
-  #card {
-    width: min(92vw, 480px);
-    max-height: 85vh;
-    max-height: 85dvh;
-    background: var(--card-bg);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(244, 213, 141, 0.3);
-    border-radius: 20px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(244, 213, 141, 0.1);
-    transform: translateY(30px) scale(0.95);
-    opacity: 0;
-    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s ease;
-  }
-
-  #card-overlay.active #card {
-    transform: translateY(0) scale(1);
-    opacity: 1;
-  }
-
-  /* 滚动条 */
-  #card::-webkit-scrollbar { width: 4px; }
-  #card::-webkit-scrollbar-track { background: transparent; }
-  #card::-webkit-scrollbar-thumb { background: rgba(244, 213, 141, 0.25); border-radius: 4px; }
-
-  #card .card-photo {
-    width: 100%;
-    max-height: 45vh;
-    max-height: 45dvh;
-    object-fit: contain;
-    display: block;
-    border-radius: 20px 20px 0 0;
-    background: rgba(0, 0, 0, 0.3);
-  }
-
-  #card .card-photo-placeholder {
-    width: 100%;
-    height: 60px;
-    background: linear-gradient(180deg, rgba(244, 213, 141, 0.1) 0%, transparent 100%);
-    border-radius: 20px 20px 0 0;
-  }
-
-  #card .card-body {
-    padding: 24px 28px 28px;
-  }
-
-  #card .card-star-icon {
-    text-align: center;
-    font-size: 2rem;
-    margin-bottom: 12px;
-    animation: starPulse 2s ease-in-out infinite;
-  }
-
-  #card .card-text {
-    font-size: clamp(1rem, 3vw, 1.15rem);
-    line-height: 1.85;
-    color: rgba(230, 225, 240, 0.9);
-    text-align: center;
-    letter-spacing: 0.03em;
-  }
-
-  #card .card-index {
-    text-align: center;
-    font-size: 0.78rem;
-    color: rgba(244, 213, 141, 0.5);
-    margin-top: 16px;
-    letter-spacing: 0.06em;
-  }
-
-  #card .card-close {
-    display: block;
-    margin: 20px auto 0;
-    padding: 10px 32px;
-    background: rgba(244, 213, 141, 0.12);
-    border: 1px solid rgba(244, 213, 141, 0.3);
-    border-radius: 25px;
-    color: #f4d58d;
-    font-size: 0.95rem;
-    cursor: pointer;
-    letter-spacing: 0.05em;
-    transition: all 0.25s ease;
-    font-family: inherit;
-  }
-
-  #card .card-close:hover {
-    background: rgba(244, 213, 141, 0.22);
-    box-shadow: 0 0 20px rgba(244, 213, 141, 0.2);
-  }
-
-  /* ===== 完成提示 ===== */
-  #complete-toast {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(0.8);
-    z-index: 200;
-    pointer-events: none;
-    text-align: center;
-    opacity: 0;
-    transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-
-  #complete-toast.show {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
-
-  #complete-toast .big-star {
-    font-size: 4rem;
-    animation: starPulse 1.5s ease-in-out infinite;
-    display: block;
-  }
-
-  #complete-toast .complete-msg {
-    font-size: 1.3rem;
-    color: #ffe8b0;
-    margin-top: 8px;
-    letter-spacing: 0.06em;
-    text-shadow: 0 0 20px rgba(244, 213, 141, 0.6);
-  }
-
-  /* ===== 提示文字 ===== */
-  #hint {
-    position: fixed;
-    bottom: clamp(60px, 12vh, 100px);
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 10;
-    font-size: 0.85rem;
-    color: rgba(200, 200, 230, 0.5);
-    letter-spacing: 0.04em;
-    animation: hintFade 3s ease-in-out infinite;
-    pointer-events: none;
-  }
-
-  @keyframes hintFade {
-    0%, 100% { opacity: 0.4; }
-    50%      { opacity: 0.85; }
-  }
-
-  /* ===== 粒子容器 ===== */
-  .particle {
-    position: fixed;
-    pointer-events: none;
-    z-index: 50;
-    border-radius: 50%;
-    animation: particleBurst 0.8s ease-out forwards;
-  }
-
-  @keyframes particleBurst {
-    0%   { transform: translate(0, 0) scale(1); opacity: 1; }
-    100% { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; }
-  }
-
-  /* ===== 移动端性能优化 ===== */
-  @media (max-width: 768px) {
-    #card {
-      backdrop-filter: none;
-      -webkit-backdrop-filter: none;
-      background: rgba(15, 15, 40, 0.95);
-    }
-    .wish-star .star-shape {
-      animation-duration: 4s;
-    }
-    .wish-star .star-rays::before,
-    .wish-star .star-rays::after {
-      display: none;
-    }
-  }
+/* === 拍立得散落位置 — 自动随机微调 === */
 </style>
 </head>
 <body>
 
-<!-- 星空背景画布 v2 -->
-<canvas id="bg-canvas"></canvas>
+<div id="desk"></div>
+<div id="fairy-lights"></div>
 
-<!-- 互动星星层 -->
-<div id="stars-layer"></div>
-
-<!-- 标题/UI层 -->
-<div id="ui-layer">
-  <div id="header">
-    <div class="title">✨ 刘语晴，生日快乐!</div>
-    <div class="subtitle">每一颗星，都有一句想对你说的话</div>
-  </div>
-  <div id="counter">发现了 <span class="count">0</span> / 15 颗星星</div>
+<div id="header">
+  <div class="title">📷 刘语晴 · 18岁回忆录</div>
+  <div class="subtitle">翻开拍立得，看看背面写了什么</div>
 </div>
 
-<!-- 提示文字 -->
-<div id="hint">🌟 点一点星星，打开一个心愿</div>
+<div id="polaroids"></div>
+<div id="hint">👆 点一张拍立得翻过来看看</div>
 
-<!-- 卡片弹窗 -->
-<div id="card-overlay">
-  <div id="card">
-    <img class="card-photo" src="" alt="" style="display:none" />
-    <div class="card-photo-placeholder"></div>
-    <div class="card-body">
-      <div class="card-star-icon">⭐</div>
-      <div class="card-text"></div>
-      <div class="card-index"></div>
-      <button class="card-close">收下这颗星 ✨</button>
-    </div>
-  </div>
-</div>
+<div id="counter">翻开了 <span class="count">0</span> / 15 张</div>
 
-<!-- 完成提示 -->
 <div id="complete-toast">
-  <span class="big-star">🌟</span>
-  <div class="complete-msg">所有的星星都为你点亮了</div>
+  <span class="icon">🎂</span>
+  <div class="msg">全部翻开了！生日快乐🎉</div>
 </div>
 
 <script>
 // ============================================================================
-//  🎂 重点在这里！！在下面编辑你的祝福语和照片 👇
+// ✏️ 在这里编辑你的祝福和照片
 // ============================================================================
-//  每条祝福是一个对象：
-//    text:  "你想说的话",
-//    photo: "照片文件名.jpg"  或  null（不需要照片就写 null）
-//
-//  把照片文件放在和这个 HTML 同一个文件夹里就行！
-//  支持 jpg / png / webp
-// ============================================================================
-
 const wishes = [
   {
     text: "恭喜你在地球online这款游戏中，又成功续费一年VIP！",
@@ -577,404 +262,98 @@ const wishes = [
 ];
 
 // ============================================================================
-//  编辑完上面的内容就可以了，下面的代码不用改 👇
+// 下面的代码不用管
 // ============================================================================
-
-// ========== Canvas 星空背景 ==========
-const canvas = document.getElementById('bg-canvas');
-const ctx = canvas.getContext('2d');
-let W, H;
-
-// 背景星星
-let bgStars = [];
 const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-const BG_STAR_COUNT = isMobile ? 80 : 250;
 
-function resizeCanvas() {
-  W = canvas.width = window.innerWidth;
-  H = canvas.height = window.innerHeight;
+// 串灯
+const lights = document.getElementById('fairy-lights');
+for(let i=0; i<18; i++) {
+  const b = document.createElement('div');
+  b.className = 'light-bulb';
+  b.style.left = (3 + i*94/17) + '%';
+  b.style.top = (15 + Math.sin(i*1.7)*20) + 'px';
+  lights.appendChild(b);
 }
 
-function createBgStars() {
-  bgStars = [];
-  for (let i = 0; i < BG_STAR_COUNT; i++) {
-    bgStars.push({
-      x: Math.random() * W,
-      y: Math.random() * H,
-      r: Math.random() * 1.8 + 0.3,
-      baseAlpha: Math.random() * 0.5 + 0.3,
-      alpha: 0,
-      twinkleSpeed: Math.random() * 0.02 + 0.005,
-      twinkleOffset: Math.random() * Math.PI * 2,
-      hue: Math.random() < 0.15 ? 210 : Math.random() < 0.3 ? 40 : 0,
-    });
-  }
-}
-
-// 流星
-let shootingStars = [];
-
-function spawnShootingStar() {
-  const fromLeft = Math.random() > 0.5;
-  shootingStars.push({
-    x: fromLeft ? Math.random() * W * 0.4 : W * 0.6 + Math.random() * W * 0.4,
-    y: Math.random() * H * 0.3,
-    vx: fromLeft ? (2.5 + Math.random() * 4) : -(2.5 + Math.random() * 4),
-    vy: 1.2 + Math.random() * 2.5,
-    life: 1,
-    decay: 0.008 + Math.random() * 0.02,
-    len: 60 + Math.random() * 100,
-  });
-}
-
-function drawBgStars(time) {
-  // 星云光晕
-  const nebula1 = ctx.createRadialGradient(W * 0.3, H * 0.35, 0, W * 0.3, H * 0.35, W * 0.5);
-  nebula1.addColorStop(0, 'rgba(30, 20, 60, 0.15)');
-  nebula1.addColorStop(0.5, 'rgba(20, 15, 45, 0.06)');
-  nebula1.addColorStop(1, 'rgba(0, 0, 0, 0)');
-  ctx.fillStyle = nebula1;
-  ctx.fillRect(0, 0, W, H);
-
-  const nebula2 = ctx.createRadialGradient(W * 0.7, H * 0.6, 0, W * 0.7, H * 0.6, W * 0.4);
-  nebula2.addColorStop(0, 'rgba(20, 30, 70, 0.1)');
-  nebula2.addColorStop(0.5, 'rgba(15, 20, 50, 0.04)');
-  nebula2.addColorStop(1, 'rgba(0, 0, 0, 0)');
-  ctx.fillStyle = nebula2;
-  ctx.fillRect(0, 0, W, H);
-
-  // 背景星星
-  for (const s of bgStars) {
-    s.alpha = s.baseAlpha + Math.sin(time * s.twinkleSpeed + s.twinkleOffset) * 0.25;
-    s.alpha = Math.max(0.1, Math.min(0.9, s.alpha));
-
-    let color;
-    if (s.hue === 210) {
-      color = `rgba(180,200,255,${s.alpha})`;
-    } else if (s.hue === 40) {
-      color = `rgba(255,240,210,${s.alpha})`;
-    } else {
-      color = `rgba(255,255,255,${s.alpha})`;
-    }
-
-    ctx.beginPath();
-    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-    ctx.fillStyle = color;
-    ctx.fill();
-
-    // 稍大的星星加辉光
-    if (s.r > 1.2 && s.alpha > 0.55) {
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r * 2.5, 0, Math.PI * 2);
-      ctx.fillStyle = color.replace(/[\d.]+\)$/, `${s.alpha * 0.15})`);
-      ctx.fill();
-    }
-  }
-
-  // 流星
-  for (let i = shootingStars.length - 1; i >= 0; i--) {
-    const m = shootingStars[i];
-    m.x += m.vx;
-    m.y += m.vy;
-    m.life -= m.decay;
-
-    if (m.life <= 0) {
-      shootingStars.splice(i, 1);
-      continue;
-    }
-
-    const endX = m.x - m.vx * m.len * 0.06;
-    const endY = m.y - m.vy * m.len * 0.06;
-
-    const grad = ctx.createLinearGradient(m.x, m.y, endX, endY);
-    grad.addColorStop(0, `rgba(255,255,255,${m.life})`);
-    grad.addColorStop(0.1, `rgba(255,240,220,${m.life * 0.8})`);
-    grad.addColorStop(1, 'rgba(255,240,220,0)');
-
-    ctx.beginPath();
-    ctx.moveTo(m.x, m.y);
-    ctx.lineTo(endX, endY);
-    ctx.strokeStyle = grad;
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-
-    // 头部亮点
-    ctx.beginPath();
-    ctx.arc(m.x, m.y, 2, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(255,255,255,${m.life})`;
-    ctx.fill();
-  }
-}
-
-// ========== 互动星星 ==========
-const starsLayer = document.getElementById('stars-layer');
-const cardOverlay = document.getElementById('card-overlay');
-const card = document.getElementById('card');
-const cardPhoto = card.querySelector('.card-photo');
-const cardPhotoPlaceholder = card.querySelector('.card-photo-placeholder');
-const cardText = card.querySelector('.card-text');
-const cardIndex = card.querySelector('.card-index');
-const cardClose = card.querySelector('.card-close');
+// 拍立得
+const container = document.getElementById('polaroids');
 const counterEl = document.getElementById('counter');
 const countSpan = counterEl.querySelector('.count');
 const hintEl = document.getElementById('hint');
-const completeToast = document.getElementById('complete-toast');
+const toast = document.getElementById('complete-toast');
+let flipped = new Set();
 
-let discovered = new Set();
-let totalStars = 0;
-let currentStarIndex = -1;
+// 网格布局 + 随机偏移
+const total = wishes.length;
+const cols = 5;
+const rows = Math.ceil(total / cols);
+const cellW = 100 / cols;
+const cellH = 100 / rows;
 
-function createWishStars() {
-  starsLayer.innerHTML = '';
-  const count = Math.min(wishes.length, 20);
-  totalStars = count;
+for(let i=0; i<total; i++) {
+  const wish = wishes[i];
+  const col = i % cols;
+  const row = Math.floor(i / cols);
+  const baseX = cellW * col + cellW/2;
+  const baseY = cellH * row + cellH/2;
+  const rx = (Math.random()-.5)*10;
+  const ry = (Math.random()-.5)*10;
+  const rot = (Math.random()-.5)*14;
 
-  // 使用泊松采样避免重叠
-  const positions = poissonSample(count, 80);
+  const el = document.createElement('div');
+  el.className = 'polaroid';
+  el.style.left = `calc(${baseX}% - 60px)`;
+  el.style.top = `calc(${baseY}% - 80px)`;
+  el.style.transform = `translate(${rx}px, ${ry}px) rotate(${rot}deg)`;
+  el.dataset.index = i;
 
-  for (let i = 0; i < count; i++) {
-    const star = document.createElement('div');
-    star.className = 'wish-star';
-    star.dataset.index = i;
-    star.style.left = (positions[i].x * 100) + '%';
-    star.style.top = (positions[i].y * 100) + '%';
-    star.style.animationDelay = (i * 0.1) + 's';
+  const frontContent = wish.photo
+    ? `<img class="polaroid-photo" src="${wish.photo}?v=${Date.now()}" alt="" onerror="this.parentElement.parentElement.parentElement.querySelector('.polaroid-back').style.display='none'; this.style.display='none';" />`
+    : `<div class="polaroid-placeholder">💝</div>`;
 
-    star.innerHTML = `
-      <div class="star-sparkle"></div>
-      <div class="star-rays"></div>
-      <div class="star-core">
-        <div class="star-shape"></div>
+  el.innerHTML = `
+    <div class="polaroid-inner">
+      <div class="polaroid-front">${frontContent}</div>
+      <div class="polaroid-back">
+        <div class="back-text">${wish.text}</div>
+        <div class="back-index">#${i+1}</div>
       </div>
-    `;
+    </div>
+  `;
 
-    star.addEventListener('click', (e) => {
-      e.stopPropagation();
-      openCard(i, star);
-    });
-
-    starsLayer.appendChild(star);
-  }
-}
-
-function poissonSample(count, minDist) {
-  // 在百分比空间 [0,1] 中进行采样，最小距离为 minDist/100
-  const minD = minDist / 100;
-  const positions = [];
-  const maxAttempts = count * 30;
-  let attempts = 0;
-
-  while (positions.length < count && attempts < maxAttempts) {
-    attempts++;
-    const candidate = {
-      x: 0.08 + Math.random() * 0.84,
-      y: 0.06 + Math.random() * 0.88,
-    };
-
-    let tooClose = false;
-    for (const p of positions) {
-      const dx = p.x - candidate.x;
-      const dy = p.y - candidate.y;
-      if (Math.sqrt(dx * dx + dy * dy) < minD) {
-        tooClose = true;
-        break;
-      }
+  el.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if(el.classList.contains('flipped')) {
+      el.classList.remove('flipped');
+      flipped.delete(i);
+    } else {
+      el.classList.add('flipped');
+      flipped.add(i);
+      if(flipped.size === 1) hintEl.style.opacity = '0';
     }
-
-    if (!tooClose) {
-      positions.push(candidate);
+    countSpan.textContent = flipped.size;
+    if(flipped.size >= total) {
+      counterEl.classList.add('complete');
+      counterEl.innerHTML = '🎉 全部翻开！共 <span class="count">'+total+'</span> 张';
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 4000);
     }
-  }
+  });
 
-  // 如果没凑够，用随机位置填充
-  while (positions.length < count) {
-    positions.push({
-      x: 0.08 + Math.random() * 0.84,
-      y: 0.06 + Math.random() * 0.88,
-    });
-  }
-
-  return positions;
+  container.appendChild(el);
 }
 
-// ========== 卡片弹窗 ==========
-function openCard(index, starEl) {
-  currentStarIndex = index;
-  const wish = wishes[index];
-
-  // 照片 — 先重置状态，避免异步竞态 bug
-  cardPhoto.onerror = null;
-  cardPhoto.onload = null;
-  cardPhoto.src = '';
-
-  if (wish.photo) {
-    cardPhoto.style.display = 'block';
-    cardPhotoPlaceholder.style.display = 'none';
-    cardPhoto.src = wish.photo + '?v=' + Date.now();
-    cardPhoto.onerror = function() {
-      cardPhoto.style.display = 'none';
-      cardPhotoPlaceholder.style.display = 'block';
-      cardPhoto.onerror = null;
-    };
-  } else {
-    cardPhoto.style.display = 'none';
-    cardPhotoPlaceholder.style.display = 'block';
-  }
-
-  cardText.textContent = wish.text;
-  cardIndex.textContent = `第 ${index + 1} 颗星`;
-  cardOverlay.classList.add('active');
-
-  // 标记已发现
-  if (!discovered.has(index)) {
-    discovered.add(index);
-    starEl.classList.add('discovered');
-    spawnParticles(starEl);
-    updateCounter();
-
-    // 隐藏提示文字
-    if (discovered.size >= 1) {
-      hintEl.style.opacity = '0';
-    }
-
-    // 检查是否全部发现
-    if (discovered.size >= totalStars) {
-      setTimeout(() => {
-        completeToast.classList.add('show');
-        // 3 秒后自动隐藏
-        setTimeout(() => completeToast.classList.remove('show'), 4000);
-      }, 600);
-    }
-  }
-
-  // 滚动到顶部
-  card.scrollTop = 0;
+// 移动端缩小
+if(isMobile) {
+  document.querySelectorAll('.polaroid').forEach(p => {
+    p.style.width = '90px';
+  });
 }
 
-function closeCard() {
-  cardOverlay.classList.remove('active');
-  currentStarIndex = -1;
-}
-
-cardClose.addEventListener('click', (e) => {
-  e.stopPropagation();
-  closeCard();
-});
-
-cardOverlay.addEventListener('click', (e) => {
-  if (e.target === cardOverlay) {
-    closeCard();
-  }
-});
-
-// ESC 键关闭
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && cardOverlay.classList.contains('active')) {
-    closeCard();
-  }
-});
-
-function updateCounter() {
-  countSpan.textContent = discovered.size;
-  if (discovered.size >= totalStars) {
-    counterEl.classList.add('complete');
-    counterEl.innerHTML = '🎉 所有星星都已点亮！共 <span class="count">' + totalStars + '</span> 颗';
-  }
-}
-
-// ========== 粒子爆发特效 ==========
-function spawnParticles(starEl) {
-  const rect = starEl.getBoundingClientRect();
-  const cx = rect.left + rect.width / 2;
-  const cy = rect.top + rect.height / 2;
-  const count = 14;
-
-  for (let i = 0; i < count; i++) {
-    const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.5;
-    const dist = 20 + Math.random() * 35;
-    const dx = Math.cos(angle) * dist;
-    const dy = Math.sin(angle) * dist;
-    const size = 2 + Math.random() * 3;
-    const hue = 40 + Math.random() * 20;
-
-    const particle = document.createElement('div');
-    particle.className = 'particle';
-    particle.style.cssText = `
-      left: ${cx}px;
-      top: ${cy}px;
-      width: ${size}px;
-      height: ${size}px;
-      background: hsl(${hue}, 90%, ${65 + Math.random() * 30}%);
-      box-shadow: 0 0 ${size * 2}px hsl(${hue}, 90%, 70%);
-      --dx: ${dx}px;
-      --dy: ${dy}px;
-    `;
-    document.body.appendChild(particle);
-
-    particle.addEventListener('animationend', () => {
-      particle.remove();
-    });
-  }
-}
-
-// ========== 主循环 ==========
-let time = 0;
-let shootingStarTimer = 0;
-
-function animate(ts) {
-  time = ts;
-
-  ctx.clearRect(0, 0, W, H);
-  drawBgStars(time);
-
-  // 随机生成流星 (移动端频率减半)
-  shootingStarTimer++;
-  const shootInterval = isMobile ? (10 + Math.random() * 15) : (4 + Math.random() * 8);
-  if (shootingStarTimer > 60 * shootInterval && shootingStars.length < (isMobile ? 1 : 3)) {
-    spawnShootingStar();
-    shootingStarTimer = 0;
-  }
-
-  requestAnimationFrame(animate);
-}
-
-// ========== 初始化 ==========
-function init() {
-  resizeCanvas();
-  createBgStars();
-  createWishStars();
-
-  // 初始时生成一颗流星
-  spawnShootingStar();
-
-  requestAnimationFrame(animate);
-}
-
-// 窗口大小变化时重建
-let resizeDebounce;
-window.addEventListener('resize', () => {
-  clearTimeout(resizeDebounce);
-  resizeDebounce = setTimeout(() => {
-    resizeCanvas();
-    createBgStars();
-    createWishStars();
-    // 保持已发现的状态
-    document.querySelectorAll('.wish-star').forEach(star => {
-      const idx = parseInt(star.dataset.index);
-      if (discovered.has(idx)) {
-        star.classList.add('discovered');
-      }
-    });
-  }, 300);
-});
-
-// 启动
-init();
-
-console.log('✨ 星空许愿瓶已就绪！');
-console.log('💡 编辑 wishes 数组来修改祝福语和照片');
-console.log('📸 把你的照片放在同一个文件夹，然后在 photo 里写上文件名就行');
-console.log('🎂 祝你朋友生日快乐！');
+console.log('📷 拍立得桌面已就绪！');
+console.log('💡 编辑 wishes 数组修改祝福语');
+console.log('🎂 刘语晴 生日快乐！');
 </script>
 </body>
 </html>
