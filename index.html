@@ -184,6 +184,66 @@ body {
   font-size:1.2rem; color:#ffe0c0; margin-top:6px;
   text-shadow:0 0 20px rgba(255,200,150,.5);
 }
+
+/* === 吹蜡烛结尾 === */
+#cake-overlay {
+  position:fixed; inset:0; z-index:500;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(5,3,0,.85); pointer-events:none; opacity:0;
+  transition:opacity .8s ease;
+}
+#cake-overlay.show { pointer-events:auto; opacity:1; }
+#cake-overlay.done { pointer-events:none; opacity:0; transition:opacity 1.5s ease 2s; }
+
+#cake-scene { text-align:center; }
+
+#cake-emoji {
+  font-size:clamp(4rem,15vw,8rem);
+  display:block; animation:cakeFloat 3s ease-in-out infinite;
+}
+@keyframes cakeFloat {
+  0%,100% { transform:translateY(0); }
+  50% { transform:translateY(-10px); }
+}
+
+#candles {
+  display:flex; justify-content:center; gap:clamp(4px,2vw,8px);
+  margin-top:-20px; position:relative; z-index:1;
+}
+.candle {
+  width:clamp(6px,2vw,10px); height:clamp(24px,6vw,38px);
+  background:linear-gradient(180deg, #ffe8d0, #f5d0a0);
+  border-radius:2px 2px 0 0; position:relative;
+}
+.candle::after {
+  content:''; position:absolute; top:-14px; left:50%; transform:translateX(-50%);
+  width:10px; height:16px;
+  background:radial-gradient(ellipse at center, #ffdd80 0%, #ff9900 40%, transparent 70%);
+  border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;
+  animation:flameFlicker .15s ease-in-out infinite alternate;
+  box-shadow:0 0 12px 4px rgba(255,150,30,.5);
+}
+.candle.out::after { opacity:0; animation:none; }
+
+@keyframes flameFlicker {
+  0% { transform:translateX(-50%) scale(1,.9); }
+  50% { transform:translateX(-50%) scale(.9,1.1) rotate(-2deg); }
+  100% { transform:translateX(-50%) scale(1.1,.85) rotate(2deg); }
+}
+
+#blow-hint {
+  color:rgba(255,220,180,.6); font-size:clamp(.8rem,2vw,.95rem);
+  margin-top:16px; letter-spacing:.05em;
+  animation:hintFade 2s ease-in-out infinite;
+}
+
+#cake-message {
+  font-size:clamp(1.4rem,4vw,2rem); color:#ffe0c0;
+  margin-top:20px; opacity:0; transform:translateY(20px);
+  transition:all 1s ease;
+  text-shadow:0 0 30px rgba(255,200,150,.6);
+}
+#cake-message.show { opacity:1; transform:translateY(0); }
 </style>
 </head>
 <body>
@@ -212,9 +272,15 @@ body {
   </div>
 </div>
 
-<div id="complete-toast">
-  <span class="icon">🎂</span>
-  <div class="msg">全部翻开了！生日快乐🎉</div>
+<div id="complete-toast" style="display:none;"></div>
+
+<div id="cake-overlay">
+  <div id="cake-scene">
+    <span id="cake-emoji">🎂</span>
+    <div id="candles"></div>
+    <div id="blow-hint">💨 点一下蛋糕，吹灭蜡烛</div>
+    <div id="cake-message">刘语晴，18岁生日快乐 ✨</div>
+  </div>
 </div>
 
 <script>
@@ -351,8 +417,7 @@ function openModal(index) {
     if(opened.size >= total) {
       counterEl.classList.add('complete');
       counterEl.innerHTML = '🎉 全部看完了！共 <span class="count">'+total+'</span> 张';
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 4000);
+      setTimeout(showCake, 800);
     }
   }
 }
@@ -404,6 +469,45 @@ if(isMobile) {
     p.style.width = '90px';
   });
 }
+
+// === 吹蜡烛 ===
+const cakeOverlay = document.getElementById('cake-overlay');
+const cakeScene = document.getElementById('cake-scene');
+const candlesRow = document.getElementById('candles');
+const blowHint = document.getElementById('blow-hint');
+const cakeMessage = document.getElementById('cake-message');
+let candlesLit = 18;
+
+// 创建 18 根蜡烛
+for(let i=0; i<18; i++) {
+  const c = document.createElement('div');
+  c.className = 'candle';
+  c.style.animationDelay = (Math.random()*2)+'s';
+  candlesRow.appendChild(c);
+}
+
+function showCake() {
+  cakeOverlay.classList.add('show');
+  candlesLit = 18;
+  document.querySelectorAll('.candle').forEach(c => c.classList.remove('out'));
+  cakeMessage.classList.remove('show');
+  blowHint.style.display = 'block';
+}
+
+// 点击一次吹灭所有蜡烛
+cakeScene.addEventListener('click', () => {
+  if(!cakeOverlay.classList.contains('show') || candlesLit <= 0) return;
+  // 一口气全灭
+  const allCandles = document.querySelectorAll('.candle');
+  allCandles.forEach((c, i) => {
+    setTimeout(() => c.classList.add('out'), i * 40);
+  });
+  candlesLit = 0;
+  blowHint.style.display = 'none';
+  setTimeout(() => cakeMessage.classList.add('show'), 600);
+  setTimeout(() => cakeOverlay.classList.add('done'), 3500);
+  setTimeout(() => cakeOverlay.classList.remove('show','done'), 5500);
+});
 
 console.log('📷 拍立得桌面已就绪！');
 console.log('💡 编辑 wishes 数组修改祝福语');
