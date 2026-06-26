@@ -85,32 +85,15 @@ body {
 .polaroid:hover { z-index:20; transform:scale(1.08); }
 .polaroid.flipped { z-index:15; }
 
-/* 3D 翻转 */
+/* 拍立得卡片 */
 .polaroid-inner {
-  position:relative; width:100%;
-  transition:transform .6s cubic-bezier(.4,0,.2,1);
-  transform-style:preserve-3d;
-}
-.polaroid.flipped .polaroid-inner { transform:rotateY(180deg); }
-
-/* 正面 & 背面 */
-.polaroid-front, .polaroid-back {
-  width:100%; backface-visibility:hidden;
-  background:#f8f4ee;
-  border-radius:2px;
+  width:100%; background:#f8f4ee;
+  border-radius:2px; padding:7px 7px 28px 7px;
   box-shadow:2px 3px 12px rgba(0,0,0,.35), 0 1px 3px rgba(0,0,0,.2);
   overflow:hidden;
 }
-.polaroid-front { padding:7px 7px 28px 7px; }
-.polaroid-back {
-  position:absolute; inset:0;
-  padding:12px 10px;
-  transform:rotateY(180deg);
-  display:flex; align-items:center; justify-content:center;
-  text-align:center;
-}
 
-/* 正面照片 */
+/* 照片区域 */
 .polaroid-photo {
   width:100%; aspect-ratio:1/1; object-fit:cover;
   display:block; background:#e8e0d8;
@@ -122,18 +105,8 @@ body {
   color:#c8b8a0; font-size:2rem;
 }
 
-/* 背面文字 */
-.polaroid-back .back-text {
-  font-size:.78rem; line-height:1.65;
-  color:#5c4030; letter-spacing:.02em;
-}
-.polaroid-back .back-index {
-  position:absolute; bottom:8px; font-size:.65rem;
-  color:rgba(120,90,60,.5); letter-spacing:.05em;
-}
-
-/* 手写体标签 */
-.polaroid-front::after {
+/* 拍立得底部装饰线 */
+.polaroid-inner::after {
   content:''; position:absolute; bottom:8px; left:50%;
   transform:translateX(-50%);
   width:30px; height:2px; background:rgba(180,150,120,.3);
@@ -143,11 +116,9 @@ body {
 /* 移动端适配 */
 @media(max-width:768px) {
   .polaroid { width:100px; }
-  .polaroid-back .back-text { font-size:.7rem; }
-  .polaroid-front { padding:5px 5px 22px 5px; }
 }
 
-/* === 翻转提示 === */
+/* === 提示文字 === */
 #hint {
   position:fixed; bottom:55px; left:50%; transform:translateX(-50%); z-index:10;
   font-size:.75rem; color:rgba(255,220,200,.4); pointer-events:none;
@@ -158,9 +129,52 @@ body {
   50% { opacity:.8; }
 }
 
+/* === 展开弹窗 === */
+#modal-overlay {
+  position:fixed; inset:0; z-index:200;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(10,5,0,0); pointer-events:none;
+  transition:background .4s ease;
+}
+#modal-overlay.active {
+  background:rgba(10,5,0,.75); pointer-events:auto;
+}
+#modal-card {
+  width:min(90vw,420px); max-height:88vh; max-height:88dvh;
+  background:#faf6ef; border-radius:8px; overflow-y:auto; overflow-x:hidden;
+  box-shadow:0 20px 50px rgba(0,0,0,.5);
+  transform:translateY(30px) scale(.92); opacity:0;
+  transition:transform .5s cubic-bezier(.34,1.56,.64,1), opacity .35s ease;
+}
+#modal-overlay.active #modal-card {
+  transform:translateY(0) scale(1); opacity:1;
+}
+#modal-card::-webkit-scrollbar { width:3px; }
+#modal-card::-webkit-scrollbar-thumb { background:rgba(0,0,0,.15); border-radius:3px; }
+#modal-card img {
+  width:100%; display:block; background:#e8e0d8;
+}
+#modal-card .modal-body {
+  padding:20px 24px 24px;
+}
+#modal-card .modal-text {
+  font-size:clamp(.95rem,2.5vw,1.1rem); line-height:1.85;
+  color:#4a3020; text-align:center; letter-spacing:.03em;
+}
+#modal-card .modal-index {
+  text-align:center; font-size:.75rem; color:rgba(120,90,60,.4);
+  margin-top:12px; letter-spacing:.05em;
+}
+#modal-card .modal-close {
+  display:block; margin:16px auto 0; padding:10px 30px;
+  background:#5c3d2e; border:none; border-radius:25px;
+  color:#f5ede0; font-size:.9rem; cursor:pointer; letter-spacing:.05em;
+  font-family:inherit;
+}
+
 /* === 完成弹窗 === */
 #complete-toast {
-  position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) scale(.8); z-index:200;
+  position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) scale(.8); z-index:300;
   pointer-events:none; text-align:center; opacity:0;
   transition:all .8s cubic-bezier(.34,1.56,.64,1);
 }
@@ -170,8 +184,6 @@ body {
   font-size:1.2rem; color:#ffe0c0; margin-top:6px;
   text-shadow:0 0 20px rgba(255,200,150,.5);
 }
-
-/* === 拍立得散落位置 — 自动随机微调 === */
 </style>
 </head>
 <body>
@@ -181,13 +193,24 @@ body {
 
 <div id="header">
   <div class="title">📷 刘语晴 · 18岁回忆录</div>
-  <div class="subtitle">翻开拍立得，看看背面写了什么</div>
+  <div class="subtitle">点开照片，看看想对你说的话</div>
 </div>
 
 <div id="polaroids"></div>
-<div id="hint">👆 点一张拍立得翻过来看看</div>
+<div id="hint">👆 点一张照片打开看看</div>
 
-<div id="counter">翻开了 <span class="count">0</span> / 15 张</div>
+<div id="counter">看过了 <span class="count">0</span> / 15 张</div>
+
+<div id="modal-overlay">
+  <div id="modal-card">
+    <img class="modal-photo" src="" alt="" style="display:none;">
+    <div class="modal-body">
+      <div class="modal-text"></div>
+      <div class="modal-index"></div>
+      <button class="modal-close">收起来 📷</button>
+    </div>
+  </div>
+</div>
 
 <div id="complete-toast">
   <span class="icon">🎂</span>
@@ -282,7 +305,57 @@ const counterEl = document.getElementById('counter');
 const countSpan = counterEl.querySelector('.count');
 const hintEl = document.getElementById('hint');
 const toast = document.getElementById('complete-toast');
-let flipped = new Set();
+const modalOverlay = document.getElementById('modal-overlay');
+const modalCard = document.getElementById('modal-card');
+const modalPhoto = modalCard.querySelector('.modal-photo');
+const modalText = modalCard.querySelector('.modal-text');
+const modalIndex = modalCard.querySelector('.modal-index');
+const modalClose = modalCard.querySelector('.modal-close');
+let opened = new Set();
+
+// 关闭弹窗
+function closeModal() {
+  modalOverlay.classList.remove('active');
+  modalPhoto.src = '';
+  modalPhoto.style.display = 'none';
+}
+modalClose.addEventListener('click', closeModal);
+modalOverlay.addEventListener('click', (e) => {
+  if(e.target === modalOverlay) closeModal();
+});
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'Escape') closeModal();
+});
+
+function openModal(index) {
+  const wish = wishes[index];
+  // 照片
+  if(wish.photo) {
+    modalPhoto.style.display = 'block';
+    modalPhoto.onerror = null;
+    modalPhoto.src = wish.photo;
+    modalPhoto.onerror = function() { modalPhoto.style.display = 'none'; };
+  } else {
+    modalPhoto.style.display = 'none';
+  }
+  modalText.textContent = wish.text;
+  modalIndex.textContent = '#' + (index+1);
+  modalCard.scrollTop = 0;
+  modalOverlay.classList.add('active');
+
+  // 标记已打开
+  if(!opened.has(index)) {
+    opened.add(index);
+    if(opened.size === 1) hintEl.style.opacity = '0';
+    countSpan.textContent = opened.size;
+    if(opened.size >= total) {
+      counterEl.classList.add('complete');
+      counterEl.innerHTML = '🎉 全部看完了！共 <span class="count">'+total+'</span> 张';
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 4000);
+    }
+  }
+}
 
 // 网格布局 + 随机偏移
 const total = wishes.length;
@@ -315,33 +388,11 @@ for(let i=0; i<total; i++) {
        </div>`
     : `<div class="polaroid-placeholder">💝</div>`;
 
-  el.innerHTML = `
-    <div class="polaroid-inner">
-      <div class="polaroid-front">${frontContent}</div>
-      <div class="polaroid-back">
-        <div class="back-text">${wish.text}</div>
-        <div class="back-index">#${i+1}</div>
-      </div>
-    </div>
-  `;
+  el.innerHTML = `<div class="polaroid-inner">${frontContent}</div>`;
 
   el.addEventListener('click', (e) => {
     e.stopPropagation();
-    if(el.classList.contains('flipped')) {
-      el.classList.remove('flipped');
-      flipped.delete(i);
-    } else {
-      el.classList.add('flipped');
-      flipped.add(i);
-      if(flipped.size === 1) hintEl.style.opacity = '0';
-    }
-    countSpan.textContent = flipped.size;
-    if(flipped.size >= total) {
-      counterEl.classList.add('complete');
-      counterEl.innerHTML = '🎉 全部翻开！共 <span class="count">'+total+'</span> 张';
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 4000);
-    }
+    openModal(i);
   });
 
   container.appendChild(el);
